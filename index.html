@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Wedding Day Brief</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+  <script src="data.js"></script>
+  <style>
+    :root {
+      --bg: #f0f4f9;
+      --card: #ffffff;
+      --ink: #0d1b2e;
+      --muted: #4a6280;
+      --sub: #33475f;
+      --line: #ccdaea;
+      --primary: #1a3154;
+      --primary-mid: #1e4d8c;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --radius: 14px;
+      --shadow: 0 2px 16px rgba(0,0,0,0.07);
+      --sans: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --nav-h: 72px;
+      --header-h: 68px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100dvh;
+      overscroll-behavior: none;
+    }
+
+    /* ── Header ── */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      min-height: var(--header-h);
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 10px 20px;
+    }
+    .header-inner { text-align: center; }
+    .header-label {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+    .header-couple {
+      font-size: 17px;
+      font-weight: 600;
+      color: #fff;
+      margin-top: 1px;
+    }
+
+    /* ── Scroll container ── */
+    main {
+      padding-top: var(--header-h);
+      padding-bottom: calc(var(--nav-h) + 8px);
+      min-height: 100dvh;
+    }
+
+    /* ── Tab panels ── */
+    .tab-panel { display: none; padding: 20px 16px; }
+    .tab-panel.active { display: block; }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 24px 0 10px 4px;
+    }
+    .section-label:first-child { margin-top: 4px; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 10px;
+    }
+
+    /* ── PHASE HEADER ── */
+    .phase-header { display: flex; align-items: center; gap: 10px; margin: 26px 0 8px; }
+    .phase-header:first-child { margin-top: 2px; }
+    .phase-header-line { flex: 1; height: 1px; background: var(--line); }
+    .phase-header-text { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+
+    /* ── SCHEDULE TIMELINE (timeline + cards) ── */
+    .timeline { position: relative; padding-left: 26px; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 5px; top: 14px; bottom: 14px;   /* line center at x = 6 */
+      width: 2px;
+      background: var(--line);
+    }
+
+    .tl-row { position: relative; margin-bottom: 10px; }
+
+    /* Node sits centered on the line, beside the card; style encodes state.
+       Row starts at x=26; node (12px) left edge at 0 → center at 6 = line center. */
+    .tl-node {
+      position: absolute;
+      left: -26px; top: 16px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 2.5px solid var(--line);        /* hollow = upcoming */
+      box-sizing: border-box;
+      z-index: 1;
+    }
+    .tl-row.is-reminder .tl-node { top: 9px; }   /* reminder card has less padding */
+    .tl-row.is-task .tl-node { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; left:-28px; top:13px; background:var(--bg); border:none; color:var(--muted); }
+    .tl-row.is-task .tl-node svg { width:13px; height:13px; }
+    .tl-row.is-now  .tl-node { border-color: var(--ink); background: var(--ink); box-shadow: 0 0 0 4px rgba(13,27,46,0.14); }  /* navy = now */
+    .tl-row.is-past .tl-node { background: var(--muted); border-color: var(--muted); }                                          /* filled = past */
+
+    /* NOW — a navy rule drawn straight across the rail at the current point in time */
+    .tl-row.is-now::before {
+      content: '';
+      position: absolute;
+      left: -26px; right: 0;
+      top: 21px;
+      height: 2px;
+      border-radius: 2px;
+      background: var(--ink);
+      z-index: 0;
+    }
+
+    /* Shared card frame; each TYPE overrides weight/fill/elevation for hierarchy */
+    .tl-card {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      column-gap: 10px;
+      align-items: start;
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+
+    /* EVENT — primary. Floating white card, strong presence. */
+    .tl-row.is-event .tl-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: 0 1px 3px rgba(13, 27, 46, 0.06), 0 6px 18px rgba(13, 27, 46, 0.07);
+    }
+    /* TASK — secondary/actionable. Neutral flat card with accent left edge. */
+    .tl-row.is-task .tl-card {
+      background: var(--bg);
+      border: 1px dashed var(--line);
+      border-left: 3px solid var(--accent);
+    }
+    /* REMINDER — tertiary/ambient. No container, recedes. */
+    .tl-row.is-reminder .tl-card {
+      background: transparent;
+      padding: 5px 14px;
+    }
+
+    .tl-row.is-past .tl-card { opacity: 0.5; }
+
+    /* Time = alignment spine (right-aligned, colons line up). */
+    .tl-time {
+      text-align: right;
+      font-size: 13px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--ink);
+      line-height: 1.5;
+      padding-top: 1px;
+      white-space: nowrap;
+    }
+    .tl-row.is-reminder .tl-time { color: var(--muted); font-weight: 600; }
+    .tl-row.is-past .tl-time { color: var(--muted); }
+
+    .tl-content { min-width: 0; }
+    /* Top-align so the checkbox / chevron sit on the first line of wrapped titles */
+    .tl-main { display: flex; align-items: flex-start; gap: 8px; min-height: 20px; }
+
+    /* Static task icon (tasks only, non-interactive) */
+    .tl-icon { display: inline-flex; flex-shrink: 0; color: var(--muted); padding-top: 2px; }
+    .tl-icon svg { width: 14px; height: 14px; }
+
+    /* Titles: events primary, tasks a step down, reminders lightest */
+    .tl-title { font-size: 14px; font-weight: 600; color: var(--ink); line-height: 1.35; min-width: 0; }
+    .tl-row.is-event .tl-title { font-size: 15.5px; font-weight: 700; }
+    .tl-row.is-reminder .tl-title { font-size: 13px; font-weight: 500; color: var(--muted); }
+    .tl-row.is-past .tl-title { color: var(--muted); }
+
+    .tl-sub { font-size: 12.5px; color: var(--sub); line-height: 1.4; margin-top: 4px; }
+    .tl-row.is-task .tl-sub { padding-left: 0; }
+
+    /* Grouped task card — several tasks under one time slot */
+    /* Schedule legend */
+    .schedule-legend { display:none; align-items:center; justify-content:center; gap:16px; margin-top:7px; }
+    .schedule-legend.show { display:flex; }
+    .legend-item { display:flex; align-items:center; gap:6px; font-size:11px; color:rgba(255,255,255,0.72); font-weight:500; }
+    .legend-swatch { width:28px; height:16px; border-radius:5px; flex-shrink:0; }
+    .legend-swatch-event { background:var(--card); border:1px solid var(--line); box-shadow:0 1px 4px rgba(13,27,46,0.1); }
+    .legend-swatch-task { background:var(--bg); border:1px dashed var(--line); border-left:3px solid var(--accent); }
+    .legend-swatch-reminder { background:transparent; border:1px dashed var(--line); }
+    .tl-tasklist { display: flex; flex-direction: column; gap: 11px; }
+    .tl-taskitem { display: flex; align-items: flex-start; gap: 8px; }
+    .tl-taskitem .tl-title { display: block; }
+    .tl-taskitem .tl-sub { padding-left: 0; }   /* already offset by the icon in the flex row */
+    .tl-person { display: inline-flex; align-items: center; gap: 5px; font-weight: 500; }
+    .tl-person svg { width: 12px; height: 12px; color: var(--muted); flex-shrink: 0; }
+
+    /* Trailing actions — accent reserved for interactivity */
+    .tl-actions { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .tl-more {
+      width: 30px; height: 30px; margin: -5px -6px -5px 0;
+      border: none; background: none; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: var(--accent); border-radius: 50%;
+    }
+    .tl-more svg { width: 18px; height: 18px; }
+
+    /* Vendor phone — name + icon are blue and tappable (dials the number) */
+    .tl-tel { color: var(--accent); font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .tl-tel svg { width: 12px; height: 12px; vertical-align: -1px; margin-right: 4px; }
+
+
+    /* ── ROLES ── */
+    .roles-group-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--accent-soft);
+      padding: 7px 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .roles-group-label .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    /* Tap-your-name selector */
+    .role-hint { font-size: 13px; color: var(--muted); margin: 0 2px 12px; }
+    .role-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .role-chip {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .role-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .role-empty {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.5;
+      text-align: center;
+      padding: 24px 16px;
+    }
+
+    .role-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 13px 15px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: box-shadow 0.3s ease;
+    }
+    .role-avatar {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary-mid);
+      flex-shrink: 0;
+      letter-spacing: -0.02em;
+    }
+    .role-info { flex: 1; }
+    .role-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .role-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      margin-top: 1px;
+    }
+    .role-tasks { margin-top: 8px; display: flex; flex-direction: column; gap: 7px; }
+    .role-task { display: flex; align-items: flex-start; gap: 6px; font-size: 12.5px; color: var(--sub); line-height: 1.35; }
+    .role-task svg { width: 13px; height: 13px; color: var(--muted); flex-shrink: 0; margin-top: 1px; }
+    .role-task-with { display: block; font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+    .role-card.is-highlight { box-shadow: 0 0 0 2px var(--accent); }
+    .role-duties {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 5px;
+      line-height: 1.5;
+    }
+    .role-duties li {
+      margin-left: 14px;
+      margin-bottom: 2px;
+    }
+
+    /* ── CONTACTS ── */
+    .contact-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .contact-icon {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .contact-icon svg { width: 20px; height: 20px; }
+    .contact-info { flex: 1; }
+    .contact-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .contact-role {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+    .contact-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-icon {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      border: none;
+      background: var(--accent-soft);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+      text-decoration: none;
+    }
+    .btn-icon:active { background: var(--line); }
+    .btn-icon svg { width: 18px; height: 18px; }
+
+    /* ── LOCATIONS ── */
+    .location-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+    }
+    .location-map {
+      width: 92px;
+      height: 92px;
+      border: 0;
+      border-radius: 10px;
+      flex-shrink: 0;
+      pointer-events: none;   /* preview only — use Get Directions to open */
+    }
+    .location-body { flex: 1; min-width: 0; }
+    .location-tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 4px 11px;
+      border-radius: 20px;
+      margin-bottom: 8px;
+    }
+    .location-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .location-address {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+    .btn-directions {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      padding: 9px 16px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+      justify-content: center;
+    }
+    .btn-directions:active { background: var(--primary-mid); }
+
+    /* ── FAQ ── */
+    .faq-item {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .faq-q {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 16px;
+      cursor: pointer;
+      gap: 12px;
+      user-select: none;
+    }
+    .faq-q-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      flex: 1;
+      line-height: 1.4;
+    }
+    .faq-chevron {
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease;
+    }
+    .faq-item.open .faq-a { max-height: 200px; }
+    .faq-a-inner {
+      padding: 0 16px 15px;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+    }
+
+    /* ── Bottom nav ── */
+    nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: var(--primary);
+      display: flex;
+      align-items: stretch;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      padding: 8px 4px 4px;
+      border: none;
+      background: none;
+      color: rgba(255,255,255,0.45);
+      font-family: var(--sans);
+      font-size: 11px;
+      font-weight: 500;
+      transition: color 0.15s;
+      position: relative;
+    }
+    .nav-item svg { width: 22px; height: 22px; }
+    .nav-item.active {
+      color: #fff;
+    }
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 20%; right: 20%;
+      height: 2px;
+      background: #fff;
+      border-radius: 0 0 2px 2px;
+    }
+
+    /* ── TASK DETAIL MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      width: 100%;
+      height: 100vh; /* fallback */
+      height: 100dvh; /* tracks the visible area as the mobile toolbar resizes */
+      background: rgba(16, 27, 45, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 24px 16px;
+      overscroll-behavior: contain;
+      transition: top 0.25s ease, height 0.25s ease;
+      animation: overlay-in 0.28s ease both;
+    }
+    .modal-overlay[hidden] { display: none; }
+    @keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+    .modal-overlay.closing { animation: overlay-out 0.24s ease both; }
+    @keyframes overlay-out { from { opacity: 1; } to { opacity: 0; } }
+    .modal {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      background: var(--card);
+      border-radius: 18px;
+      padding: 22px 20px 24px;
+      box-shadow: 0 12px 40px rgba(16, 27, 45, 0.25);
+      animation: modal-in 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes modal-in {
+      from { transform: translateY(24px) scale(0.98); opacity: 0; }
+      to   { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .modal-overlay.closing .modal { animation: modal-out 0.24s cubic-bezier(0.4, 0, 1, 1) both; }
+    @keyframes modal-out {
+      from { transform: translateY(0) scale(1); opacity: 1; }
+      to   { transform: translateY(24px) scale(0.98); opacity: 0; }
+    }
+    .modal-close {
+      position: absolute;
+      top: 14px; right: 14px;
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      border: none;
+      background: var(--bg);
+      color: var(--muted);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .modal-time {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.3;
+      margin: 0 40px 8px 0;
+    }
+    .modal-person {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+    }
+    .modal-person[hidden] { display: none; }
+    .modal-details {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--ink);
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="header-label">Bridal Party Brief</div>
+      <div class="header-couple">Jun Yu &amp; May · 26 Sep 2026</div>
+      <div class="schedule-legend show" id="schedule-legend">
+        <div class="legend-item">
+          <span class="legend-swatch legend-swatch-event"></span>
+          <span>Event</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch legend-swatch-task"></span>
+          <span>Task</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="tab-panel active" id="tab-schedule">
+      <div id="schedule-timeline"></div>
+    </div>
+    <div class="tab-panel" id="tab-roles"><div id="roles-content"></div></div>
+    <div class="tab-panel" id="tab-contacts"><div id="contacts-content"></div></div>
+    <div class="tab-panel" id="tab-locations"><div id="locations-content"></div></div>
+    <div class="tab-panel" id="tab-faq"><div id="faq-content"></div></div>
+  </main>
+
+  <!-- ── Bottom navigation ── -->
+  <nav>
+    <button class="nav-item active" data-tab="schedule">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Schedule
+    </button>
+    <button class="nav-item" data-tab="roles">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Roles
+    </button>
+    <button class="nav-item" data-tab="contacts">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 13 19.79 19.79 0 0 1 1.08 4.35 2 2 0 0 1 3.05 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z"/></svg>
+      Contacts
+    </button>
+    <button class="nav-item" data-tab="locations">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Locations
+    </button>
+    <button class="nav-item" data-tab="faq">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      FAQ
+    </button>
+  </nav>
+
+  <!-- ── Task detail modal ── -->
+  <div class="modal-overlay" id="task-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button class="modal-close" id="modal-close" aria-label="Close"></button>
+      <div class="modal-time" id="modal-time"></div>
+      <h3 class="modal-title" id="modal-title"></h3>
+      <div class="modal-person" id="modal-person"></div>
+      <div class="modal-details" id="modal-details"></div>
+    </div>
+  </div>
+
+  <script>
+    // ── Shared SVG snippets ──────────────────────────────────────
+    const SVG = {
+      phone:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 13 19.79 19.79 0 0 1 1.08 4.35 2 2 0 0 1 3.05 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z"/></svg>`,
+      pin:      `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+      nav:      `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>`,
+      chevron:  `<svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+      person:   `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>`,
+      bell:     `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
+      task:     `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`,
+      checkbox: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/></svg>`,
+      calendar: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+      chevronDown: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+      info:     `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="7.5" x2="12.01" y2="7.5"/></svg>`,
+      expand:   `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`,
+      close:    `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+    };
+
+    const contactIcons = {
+      coordinator: `<svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 3v4M8 3v4M12 12h.01"/></svg>`,
+      person:      `<svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>`,
+      home:        `<svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+      mic:         `<svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>`,
+    };
+
+    // ── Tab switching ────────────────────────────────────────────
+    const navItems = document.querySelectorAll('.nav-item');
+    const panels   = document.querySelectorAll('.tab-panel');
+    const legendEl = document.getElementById('schedule-legend');
+
+    // Legend lives in the header but is only relevant to Schedule; the header
+    // grows when it shows, so keep main's top padding in sync with its height.
+    function syncHeaderOffset() {
+      document.querySelector('main').style.paddingTop =
+        document.querySelector('header').offsetHeight + 'px';
+    }
+
+    navItems.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+        navItems.forEach(b => b.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + target).classList.add('active');
+        legendEl.classList.toggle('show', target === 'schedule');
+        syncHeaderOffset();
+        if (target === 'schedule') {
+          requestAnimationFrame(() => requestAnimationFrame(scrollToCurrent));
+        } else {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+      });
+    });
+    syncHeaderOffset();
+    window.addEventListener('resize', syncHeaderOffset);
+
+    // ── Helpers ──────────────────────────────────────────────────
+    function minsNow() {
+      const n = new Date(); return n.getHours() * 60 + n.getMinutes();
+    }
+    function weddingStatus() {
+      const n = new Date();
+      const today   = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+      const wedding = new Date(WEDDING.year, WEDDING.month, WEDDING.day);
+      if (today < wedding) return 'before';
+      if (today > wedding) return 'after';
+      return 'today';
+    }
+    function currentIdx() {
+      const m = minsNow(); let idx = -1;
+      for (let i = 0; i < events.length; i++) { if (events[i].mins <= m) idx = i; }
+      return idx;
+    }
+    // On load, jump the schedule to the current section, starting at its phase header
+    function scrollToCurrent() {
+      const items = document.querySelectorAll('#schedule-timeline .tl-row');
+      if (!items.length) return;
+      const idx = currentIdx();
+      const item = idx >= 0 ? items[Math.min(idx, items.length - 1)] : items[0];
+      if (!item) return;
+      // Scroll to the phase header for this item's section, so the title isn't hidden
+      const timeline = item.closest('.timeline');
+      const phaseHeader = timeline && timeline.previousElementSibling;
+      const target = (phaseHeader && phaseHeader.classList.contains('phase-header')) ? phaseHeader : item;
+      const headerH = document.querySelector('header').offsetHeight || 68;
+      const y = target.getBoundingClientRect().top + window.scrollY - headerH - 12;
+      window.scrollTo({ top: Math.max(y, 0), behavior: 'auto' });
+    }
+
+    // ── Render: header ───────────────────────────────────────────
+    function renderHeader() {
+      document.querySelector('.header-couple').textContent =
+        `${WEDDING.groom} & ${WEDDING.bride} · ${WEDDING.dateDisplay}`;
+    }
+
+    // ── Render: schedule ─────────────────────────────────────────
+    // Wrap phone-number-like sequences (7+ digits) in tappable tel: links
+    function linkifyPhones(text) {
+      return text.replace(/(\+?\d[\d\s-]{5,}\d)/g, (m) => {
+        const tel = m.replace(/[^\d+]/g, '');
+        return `<a class="tel-link" href="tel:${tel}">${m.trim()}</a>`;
+      });
+    }
+
+    // Pull the first phone-like number out of a string, digits only for tel:
+    function firstPhone(text) {
+      const m = (text || '').match(/\+?\d[\d\s-]{5,}\d/);
+      return m ? m[0].replace(/[^\d+]/g, '') : null;
+    }
+    // Remove a phone number and any dangling separators from a sub string
+    // Build a sub line where the vendor's name (the bit before the number) is a
+    // blue, tappable tel: link with a phone icon; surrounding context stays muted.
+    function vendorSub(sub, phone) {
+      const re = /\+?\d[\d\s-]{5,}\d/;
+      const idx = sub.search(re);
+      let before = sub.slice(0, idx).replace(/[\s·\-–]+$/, '').trim();
+      let after  = sub.slice(idx).replace(re, '').replace(/^[\s·\-–]+/, '').trim();
+      const parts  = before.split('·').map(s => s.trim()).filter(Boolean);
+      const name   = parts.pop() || before || 'Call';
+      const prefix = parts.join(' · ');
+      let html = '';
+      if (prefix) html += `${prefix} · `;
+      html += `<a class="tl-tel" href="tel:${phone}">${SVG.phone}${name}</a>`;
+      if (after) html += ` · ${after}`;
+      return html;
+    }
+
+    function renderTimeline() {
+      const container = document.getElementById('schedule-timeline');
+      const status    = weddingStatus();
+      const currIdx   = status === 'today' ? currentIdx() : -1;
+      let html = '', lastPhase = -1;
+
+      events.forEach((ev, i) => {
+        if (ev.phase !== lastPhase) {
+          if (lastPhase !== -1) html += '</div>';
+          html += `<div class="phase-header">
+            <div class="phase-header-line"></div>
+            <div class="phase-header-text">${phases[ev.phase].name}</div>
+            <div class="phase-header-line"></div>
+          </div><div class="timeline">`;
+          lastPhase = ev.phase;
+        }
+
+        const isTask     = ev.type === 'task';
+        const isReminder = ev.type === 'reminder';
+        const isEvent    = !isTask && !isReminder;
+        const isCurrent  = i === currIdx;
+        const isPast     = status === 'today' && i < currIdx;
+        const hasDetails = !!ev.details;
+        const phone      = isEvent ? firstPhone(ev.sub) : null;
+
+        const typeCls = isTask ? 'is-task' : isReminder ? 'is-reminder' : 'is-event';
+        const state = ['tl-row', typeCls, isCurrent && 'is-now', isPast && 'is-past']
+          .filter(Boolean).join(' ');
+
+        let contentHtml;
+        if (isTask && ev.items) {
+          // Grouped task card — several tasks sharing one time slot
+          const rows = ev.items.map(it => `
+            <div class="tl-taskitem">
+              <span class="tl-icon">${SVG.task}</span>
+              <div class="tl-taskitem-body">
+                <span class="tl-title">${it.title}</span>
+                ${it.assignee ? `<div class="tl-sub"><span class="tl-person">${SVG.person} ${it.assignee}</span></div>` : ''}
+              </div>
+            </div>`).join('');
+          contentHtml = `<div class="tl-tasklist">${rows}</div>`;
+        } else {
+          const lead = '';
+
+          let actions = '';
+          if (hasDetails) actions += `<button class="tl-more" data-task="${i}" aria-label="More info">${SVG.info}</button>`;
+          if (actions)    actions = `<span class="tl-actions">${actions}</span>`;
+
+          let sub = '';
+          if (isTask && ev.assignee) {
+            sub = `<div class="tl-sub"><span class="tl-person">${SVG.person} ${ev.assignee}</span></div>`;
+          } else if (phone) {
+            sub = `<div class="tl-sub">${vendorSub(ev.sub, phone)}</div>`;
+          } else if (ev.sub) {
+            sub = `<div class="tl-sub">${ev.sub}</div>`;
+          }
+
+          contentHtml = `<div class="tl-main">${lead}<span class="tl-title">${ev.title}</span>${actions}</div>${sub}`;
+        }
+
+        html += `<div class="${state}">
+          <span class="tl-node">${isTask ? SVG.task : ''}</span>
+          <div class="tl-card">
+            <div class="tl-time">${ev.time}</div>
+            <div class="tl-content">${contentHtml}</div>
+          </div>
+        </div>`;
+      });
+      if (lastPhase !== -1) html += '</div>';
+      container.innerHTML = html;
+    }
+
+    // ── Render: roles ────────────────────────────────────────────
+    function initials(name) {
+      return (name || '').split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    }
+    function renderRoles() {
+      const container = document.getElementById('roles-content');
+      const all = [...roles.bride, ...roles.groom];
+      const singularOf = {};
+      roles.bride.forEach(p => { singularOf[p.id] = 'Bridesmaid'; });
+      roles.groom.forEach(p => { singularOf[p.id] = 'Groomsman'; });
+
+      // Map each task to everyone doing it, so shared tasks can show teammates
+      const taskPeople = {};
+      all.forEach(p => (p.tasks || []).forEach(t => {
+        (taskPeople[t] = taskPeople[t] || []).push(p.name);
+      }));
+
+      function cardHtml(p) {
+        const roleLabel = p.title || singularOf[p.id];
+        const tasksHtml = (p.tasks && p.tasks.length)
+          ? `<div class="role-tasks">${p.tasks.map(t => {
+              const others = (taskPeople[t] || []).filter(n => n !== p.name);
+              const withHtml = others.length ? `<span class="role-task-with">with ${others.join(', ')}</span>` : '';
+              return `<div class="role-task">${SVG.task}<span>${t}${withHtml}</span></div>`;
+            }).join('')}</div>`
+          : '';
+        return `<div class="role-card">
+          <div class="role-avatar">${initials(p.name)}</div>
+          <div class="role-info">
+            <div class="role-name">${p.name}</div>
+            <div class="role-title${p.title ? '' : ' is-default'}">${roleLabel}</div>
+            ${tasksHtml}
+          </div>
+          ${p.phone ? `<a class="btn-icon" href="tel:${p.phone.replace(/\s/g, '')}">${SVG.phone}</a>` : ''}
+        </div>`;
+      }
+
+      container.innerHTML = `
+        <p class="role-hint">Tap your name to see your tasks 👇</p>
+        <div class="role-chips">${all
+          .map(p => `<button class="role-chip" data-jump="${p.id}">${p.name}</button>`)
+          .join('')}</div>
+        <div id="role-detail"><div class="role-empty">Select your name above to see your role, tasks, and who you're working with.</div></div>`;
+
+      const detail = container.querySelector('#role-detail');
+      container.querySelectorAll('.role-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          container.querySelectorAll('.role-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          detail.innerHTML = cardHtml(all.find(x => x.id === chip.dataset.jump));
+        });
+      });
+    }
+
+    // ── Render: contacts ─────────────────────────────────────────
+    function renderContacts() {
+      const container = document.getElementById('contacts-content');
+      let html = '<p class="section-label">Key contacts</p>';
+      contacts.forEach(c => {
+        html += `<div class="contact-card">
+          <div class="contact-icon">${contactIcons[c.iconType] || contactIcons.person}</div>
+          <div class="contact-info">
+            <div class="contact-name">${c.name}</div>
+            <div class="contact-role">${c.role}</div>
+          </div>
+          <div class="contact-actions">
+            <a class="btn-icon" href="tel:${c.phone}">${SVG.phone}</a>
+          </div>
+        </div>`;
+      });
+      container.innerHTML = html;
+    }
+
+    // ── Render: locations ────────────────────────────────────────
+    function renderLocations() {
+      const container = document.getElementById('locations-content');
+      let html = '<p class="section-label">Venues</p>';
+      locations.forEach(loc => {
+        const q = encodeURIComponent(`${loc.name} ${loc.address}`);
+        html += `<div class="location-card">
+          <iframe class="location-map" src="https://maps.google.com/maps?q=${q}&z=15&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="${loc.name} map"></iframe>
+          <div class="location-body">
+            <div class="location-tag">${loc.tag}</div>
+            <div class="location-name">${loc.name}</div>
+            <div class="location-address">${loc.address}</div>
+            <a class="btn-directions" href="${loc.mapsUrl}">${SVG.nav} Get Directions</a>
+          </div>
+        </div>`;
+      });
+      container.innerHTML = html;
+    }
+
+    // ── Render: FAQ ──────────────────────────────────────────────
+    function renderFAQ() {
+      const container = document.getElementById('faq-content');
+      let html = '<p class="section-label">If a guest asks you...</p>';
+      faqs.forEach(f => {
+        html += `<div class="faq-item">
+          <div class="faq-q"><span class="faq-q-text">${f.q}</span>${SVG.chevron}</div>
+          <div class="faq-a"><div class="faq-a-inner">${f.a}</div></div>
+        </div>`;
+      });
+      container.innerHTML = html;
+      container.querySelectorAll('.faq-q').forEach(q => {
+        q.addEventListener('click', () => {
+          const item = q.closest('.faq-item');
+          const isOpen = item.classList.contains('open');
+          container.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+          if (!isOpen) item.classList.add('open');
+        });
+      });
+    }
+
+    // ── Task detail modal ────────────────────────────────────────
+    const modal        = document.getElementById('task-modal');
+    const modalClose   = document.getElementById('modal-close');
+    modalClose.innerHTML = SVG.close;
+
+    function openTaskModal(ev) {
+      document.getElementById('modal-time').textContent    = ev.time;
+      document.getElementById('modal-title').textContent   = ev.title;
+      document.getElementById('modal-person').innerHTML     = ev.assignee ? `${SVG.person} ${ev.assignee}` : '';
+      document.getElementById('modal-person').hidden        = !ev.assignee;
+      document.getElementById('modal-details').textContent = ev.details || '';
+      // Open instantly (no transition), then allow smooth gliding on later toolbar resizes
+      modal.style.transition = 'none';
+      modal.hidden = false;
+      syncOverlayToViewport();
+      requestAnimationFrame(() => { modal.style.transition = ''; });
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', syncOverlayToViewport);
+        window.visualViewport.addEventListener('scroll', syncOverlayToViewport);
+      }
+    }
+    function closeTaskModal() {
+      if (modal.hidden || modal.classList.contains('closing')) return;
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', syncOverlayToViewport);
+        window.visualViewport.removeEventListener('scroll', syncOverlayToViewport);
+      }
+      // Play the exit animation, then hide once it finishes
+      modal.classList.add('closing');
+      modal.addEventListener('animationend', function done(e) {
+        if (e.animationName !== 'overlay-out') return; // ignore the card's own anim
+        modal.removeEventListener('animationend', done);
+        modal.hidden = true;
+        modal.classList.remove('closing');
+        // clear inline sizing so the CSS fallback applies next open
+        modal.style.top = modal.style.left = modal.style.width = modal.style.height = '';
+      });
+    }
+
+    // Size the overlay to the *visible* area (excludes the mobile toolbar), so the
+    // centered modal stays put without locking scroll or resizing the toolbar.
+    function syncOverlayToViewport() {
+      const vv = window.visualViewport;
+      if (!vv) return; // older browsers fall back to the CSS 100dvh centering
+      modal.style.top = vv.offsetTop + 'px';
+      modal.style.left = vv.offsetLeft + 'px';
+      modal.style.width = vv.width + 'px';
+      modal.style.height = vv.height + 'px';
+    }
+
+    // Delegated: the info button opens the task's details modal
+    document.getElementById('schedule-timeline').addEventListener('click', (e) => {
+      const more = e.target.closest('.tl-more[data-task]');
+      if (more) openTaskModal(events[+more.dataset.task]);
+    });
+    // Close via the close button or Escape
+    modalClose.addEventListener('click', closeTaskModal);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeTaskModal(); });
+
+    // ── Init ─────────────────────────────────────────────────────
+    // Keep the schedule chronological regardless of array order in data.js
+    events.sort((a, b) => a.phase - b.phase || a.mins - b.mins);
+    renderHeader();
+    renderTimeline();
+    renderRoles();
+    renderContacts();
+    renderLocations();
+    renderFAQ();
+    // Schedule is the landing tab — jump to the current section on load and when reopened
+    requestAnimationFrame(() => requestAnimationFrame(scrollToCurrent));
+    setInterval(renderTimeline, 60000);
+  </script>
+</body>
+</html>
