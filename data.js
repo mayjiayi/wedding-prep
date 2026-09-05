@@ -60,7 +60,7 @@ const events = [
     title: 'Prepare items to bring to venue',
     assignee: 'Wei Jie',
     details:
-      "• Wedding bands x 2\n• Bridal bouquet\n• Jy's boutonnière\n• Parents' corsages\n• May's shoes\n• Hotel key card \n\nIf anything is missing, flag it to Junyu or May.",
+      "• Wedding bands x 2\n• Bridal bouquet\n• Jy's boutonnière\n• Parents' corsages\n• May's shoes\n• Hotel key card\n• Thank you cards\n• Vows cards \n\nIf anything is missing, flag it to Junyu or May.",
   },
   {
     phase: 0,
@@ -392,30 +392,14 @@ const locations = [
   },
 ];
 
-// ── FAQs ──────────────────────────────────────────────────────────────────────
-const faqs = [
-  {
-    q: 'Where is the bathroom / toilet?',
-    a: '[Answer — e.g. "Down the corridor, second door on the left."]',
-  },
-  {
-    q: 'Where should I park?',
-    a: '[Answer — e.g. "Free parking behind the venue off [Street Name]."]',
-  },
-  {
-    q: 'Is there a dress code?',
-    a: '[Answer — e.g. "Cocktail attire. No white or ivory please."]',
-  },
-  {
-    q: 'Where do I sit / find my table?',
-    a: '[Answer — e.g. "There\'s a seating chart at the entrance. Your name card is on the table."]',
-  },
-  {
-    q: 'What time does the reception end?',
-    a: '[Answer — e.g. "3:00 PM. Transport is easy from the front of the venue."]',
-  },
-  {
-    q: 'Can I take photos / post on social media?',
-    a: '[Answer — e.g. "Yes! Tag us at #[WeddingHashtag]. Please keep phones away during the ceremony."]',
-  },
+// ── Key info at a glance ──────────────────────────────────────────────────────
+const glance = [
+  { icon: '🪑', label: 'Be seated by', value: '12:20 PM' },
+  { icon: '💍', label: 'Solemnisation', value: '12:35 PM' },
+  { icon: '🍽️', label: 'Lunch', value: '1:00 PM' },
+  { icon: '🎉', label: 'Reception ends', value: '3:00 PM' },
+  { icon: '🧧', label: 'Angbao', value: 'Give to Wei Jie' },
+  { icon: '🅿️', label: 'Parking ticket', value: 'See Wei Jie' },
+  { icon: '📱', label: 'Find your seat', value: 'Scan the QR code' },
+  { icon: '🚻', label: 'Toilet', value: 'Left of the screen' },
 ];
