@@ -76,7 +76,7 @@ const events = [
     title: 'Prepare items to bring to venue',
     assignee: 'Wei Jie',
     details:
-      "• Wedding bands x 2\n• Bridal bouquet\n• JY's parents corsages\n• Hotel key card\n• Vows cards\n• Polaroid\n• Angbaos for venue people\n• Venue decorations\n• Misc items\n\nIf anything is missing, flag it to Junyu or May.",
+      "• Wedding bands x 2\n• Bridal bouquet\n• JY's parents corsages\n• Hotel key card\n• Vows cards\n• Polaroid\n• Thumbdrive\n• Angbaos for venue people\n• Venue decorations\n• Misc items\n\nIf anything is missing, flag it to Junyu or May.",
   },
   {
     phase: 0,
