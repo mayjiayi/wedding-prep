@@ -30,6 +30,14 @@ const events = [
   },
   {
     phase: 0,
+    type: 'event',
+    time: '5:00 AM',
+    mins: 300,
+    title: "Jy's makeup & styling begins",
+    sub: 'Carlton Hotel · Anna - 8925 8028 · end ~5.30 AM',
+  },
+  {
+    phase: 0,
     type: 'task',
     time: '5:00 AM',
     mins: 300,
@@ -62,21 +70,13 @@ const events = [
   },
   {
     phase: 0,
-    type: 'event',
-    time: '6:30 AM',
-    mins: 390,
-    title: "Jy's styling begins",
-    sub: '',
-  },
-  {
-    phase: 0,
     type: 'task',
     time: '6:30 AM',
     mins: 390,
     title: 'Prepare items to bring to venue',
     assignee: 'Wei Jie',
     details:
-      "• Wedding bands x 2\n• Bridal bouquet\n• Jy's boutonnière\n• Parents' corsages\n• May's shoes\n• Hotel key card\n• Thank you cards\n• Vows cards \n\nIf anything is missing, flag it to Junyu or May.",
+      "• Wedding bands x 2\n• Bridal bouquet\n• JY's parents corsages\n• Hotel key card\n• Vows cards\n• Polaroid\n• Angbaos for venue people\n• Venue decorations\n• Misc items\n\nIf anything is missing, flag it to Junyu or May.",
   },
   {
     phase: 0,
@@ -123,7 +123,7 @@ const events = [
     type: 'task',
     time: '8:00 AM',
     mins: 480,
-    title: 'Reach National Gallery Singapore',
+    title: 'Reach Esplanade',
     assignee: 'Everyone',
   },
   {
@@ -132,7 +132,7 @@ const events = [
     time: '8:15 AM',
     mins: 495,
     title: 'Start Photoshoot',
-    sub: 'National Gallery Singapore',
+    sub: 'Esplanade',
   },
   {
     phase: 0,
@@ -217,8 +217,8 @@ const events = [
     type: 'task',
     time: '10:00 AM',
     mins: 600,
-    title: 'Set up music and video',
-    assignee: 'Richie',
+    title: 'Set up music and slides',
+    assignee: 'Gin Ling',
   },
   {
     phase: 1,
@@ -463,9 +463,10 @@ const roles = {
       phone: '8448 0040',
       title: '',
       tasks: [
-        'Reach National Gallery Singapore',
+        'Reach Esplanade',
         'Prepare for tea ceremony',
         'Venue decorations',
+        'Set up music and slides',
         'Handle tea ceremony',
         'Handle reception',
         'Pass all angbaos from tea ceremony to Weijie',
@@ -479,7 +480,7 @@ const roles = {
       tasks: [
         "Call May's mum — confirm ETA",
         "Pass corsages to May's parents",
-        'Reach National Gallery Singapore',
+        'Reach Esplanade',
         'Reception table decorations',
         "Bride's person",
       ],
@@ -491,7 +492,7 @@ const roles = {
       title: '',
       tasks: [
         "Handle May's Instagram",
-        'Reach National Gallery Singapore',
+        'Reach Esplanade',
         'Prepare for tea ceremony',
         'Venue decorations',
         'Handle tea ceremony',
@@ -504,7 +505,7 @@ const roles = {
       title: '',
       tasks: [
         'Our DJI IC',
-        'Reach National Gallery Singapore',
+        'Reach Esplanade',
         'Prepare for tea ceremony',
         'Venue decorations',
         'Handle tea ceremony',
@@ -518,7 +519,7 @@ const roles = {
       title: '',
       tasks: [
         'Order breakfast',
-        'Reach National Gallery Singapore',
+        'Reach Esplanade',
         "Pass corsages to JY's parents",
         'Reception table decorations',
         'Handle reception',
@@ -532,7 +533,7 @@ const roles = {
       name: 'Shijun',
       phone: '9731 6543',
       title: 'Main PIC',
-      tasks: ['Reach National Gallery Singapore', 'Table cards placement', 'Venue decorations'],
+      tasks: ['Reach Esplanade', 'Table cards placement', 'Venue decorations'],
     },
     {
       id: 'G2',
@@ -540,7 +541,7 @@ const roles = {
       phone: '9727 7684',
       title: '',
       tasks: [
-        'Reach National Gallery Singapore',
+        'Reach Esplanade',
         'Table cards placement',
         'Venue decorations',
         'Handle reception',
@@ -553,11 +554,10 @@ const roles = {
       phone: '8369 1997',
       title: '',
       tasks: [
-        'Reach National Gallery Singapore',
+        'Reach Esplanade',
         'Table cards placement',
         'Venue decorations',
         'Handle reception',
-        'Set up music and video',
         'Prep Kahoot game',
       ],
     },
@@ -569,7 +569,7 @@ const roles = {
       tasks: [
         'Prepare items to bring to venue',
         'Make sure JY wears his corsage',
-        'Reach National Gallery Singapore',
+        'Reach Esplanade',
         'Guard angbaos with your life',
       ],
     },
@@ -579,7 +579,7 @@ const roles = {
       phone: '8807 8344',
       title: 'Emcee',
       tasks: [
-        'Reach National Gallery Singapore',
+        'Reach Esplanade',
         'Handle tea ceremony',
         'Receive solemniser',
         'Yap yap yap',
@@ -618,9 +618,9 @@ const locations = [
   },
   {
     tag: 'Photoshoot',
-    name: 'National Gallery Singapore',
-    address: "1 St Andrew's Road, Singapore 178957",
-    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=National%20Gallery%20Singapore',
+    name: 'Esplanade',
+    address: '1 Esplanade Drive, Singapore 038981',
+    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Esplanade%20Singapore',
   },
 ];
 
